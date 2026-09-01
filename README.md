@@ -3,52 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Local RAG - README</title>
-<style>
-    body {
-        font-family: Arial, Helvetica, sans-serif;
-        line-height: 1.6;
-        max-width: 1000px;
-        margin: 0 auto;
-        padding: 40px 24px;
-        color: #222;
-        background: #fff;
-    }
-    h1, h2, h3 { line-height: 1.25; }
-    h1 { border-bottom: 2px solid #ddd; padding-bottom: 12px; }
-    h2 { margin-top: 36px; border-bottom: 1px solid #ddd; padding-bottom: 6px; }
-    code, pre {
-        font-family: Consolas, "Courier New", monospace;
-    }
-    code {
-        background: #f2f2f2;
-        padding: 2px 5px;
-        border-radius: 4px;
-    }
-    pre {
-        background: #f6f8fa;
-        padding: 16px;
-        overflow-x: auto;
-        border-radius: 6px;
-    }
-    table {
-        border-collapse: collapse;
-        width: 100%;
-        margin: 16px 0;
-    }
-    th, td {
-        border: 1px solid #ddd;
-        padding: 9px 12px;
-        text-align: left;
-    }
-    th { background: #f5f5f5; }
-    .note {
-        background: #f6f8fa;
-        border-left: 4px solid #777;
-        padding: 12px 16px;
-        margin: 16px 0;
-    }
-</style>
+
 </head>
 <body>
 
