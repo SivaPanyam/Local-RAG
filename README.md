@@ -1,82 +1,153 @@
-# Local RAG — Retrieval-Augmented Generation
+Local RAG
+A fully local Retrieval-Augmented Generation (RAG) prototype built with Python, FastEmbed, ChromaDB, Ollama, and Streamlit.
 
-A fully local, open-source Retrieval-Augmented Generation (RAG) system built with Python, FastEmbed, ChromaDB, Ollama, and Streamlit.
+The system processes local documents, creates embeddings, stores them in ChromaDB, retrieves relevant chunks, and generates answers using the local llama3.2 model through Ollama.
 
-This project implements a complete local RAG pipeline that can ingest documents, split them into meaningful chunks, convert those chunks into vector embeddings, store them in a persistent vector database, retrieve the most relevant information for a user's question, construct a grounded prompt, and generate an answer using a locally running Large Language Model.
+No OpenAI API or paid cloud API is required.
 
-The project is designed as a practical RAG engineering project rather than a black-box chatbot.
+Tech Stack
+Component	Technology
+Language	Python 3.12+
+Document Processing	LangChain
+Embeddings	FastEmbed
+Embedding Model	BAAI/bge-small-en-v1.5
+Runtime	ONNX Runtime
+Vector Database	ChromaDB
+LLM Runtime	Ollama
+LLM	llama3.2
+Interface	Streamlit
+Project Structure
+rag/
+│
+├── app/
+│   ├── __init__.py
+│   ├── chunking.py
+│   ├── embeddings.py
+│   ├── generation.py
+│   ├── indexing.py
+│   ├── ingestion.py
+│   ├── prompt.py
+│   ├── rag_pipeline.py
+│   ├── retrieval.py
+│   ├── streamlit_app.py
+│   └── vector_store.py
+│
+├── tests/
+│   ├── __init__.py
+│   ├── test_generation.py
+│   ├── test_indexing.py
+│   ├── test_prompt.py
+│   ├── test_rag.py
+│   └── test_retrieval.py
+│
+├── watch_folder/
+├── chroma_db/
+├── requirements.txt
+├── run_app.py
+├── README.md
+└── .gitignore
+Note: watch_folder/ is used for local documents, while chroma_db/ contains generated local vector data. Both are excluded from Git.
+Installation
+1. Clone the Repository
+git clone https://github.com/SivaPanyam/Local-RAG.git
+cd Local-RAG
+2. Create a Virtual Environment
+python -m venv .venv
+Activate it on Windows PowerShell:
 
-Every major stage of the RAG pipeline is implemented as a separate Python module so that the system can be understood, tested, modified, and extended.
+.venv\Scripts\Activate.ps1
+3. Verify Python
+python --version
+python -m pip --version
+4. Install Dependencies
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+Ollama Setup
+Verify Ollama:
 
----
+ollama --version
+Check installed models:
 
-# Table of Contents
+ollama list
+If llama3.2 is not installed:
 
-- [Project Overview](#project-overview)
-- [Project Goals](#project-goals)
-- [Core Architecture](#core-architecture)
-- [End-to-End Data Flow](#end-to-end-data-flow)
-- [Technology Stack](#technology-stack)
-- [Current Features](#current-features)
-- [Project Structure](#project-structure)
-- [RAG Pipeline Components](#rag-pipeline-components)
-- [Document Ingestion](#document-ingestion)
-- [Document Chunking](#document-chunking)
-- [Embedding Generation](#embedding-generation)
-- [Vector Database](#vector-database)
-- [Retrieval](#retrieval)
-- [Prompt Construction](#prompt-construction)
-- [Local LLM Generation](#local-llm-generation)
-- [End-to-End RAG Pipeline](#end-to-end-rag-pipeline)
-- [Streamlit Interface](#streamlit-interface)
-- [Installation](#installation)
-- [Configuration](#configuration)
-- [Using Your Own Documents](#using-your-own-documents)
-- [Indexing Documents](#indexing-documents)
-- [Asking Questions](#asking-questions)
-- [Testing](#testing)
-- [Example RAG Flow](#example-rag-flow)
-- [Multi-Document Retrieval](#multi-document-retrieval)
-- [Current Prototype Results](#current-prototype-results)
-- [Design Decisions](#design-decisions)
-- [Local and Privacy-First Architecture](#local-and-privacy-first-architecture)
-- [Current Limitations](#current-limitations)
-- [Future Development](#future-development)
-- [RAG Learning Lab](#rag-learning-lab)
-- [Future Architecture](#future-architecture)
-- [Development Philosophy](#development-philosophy)
-- [Project Status](#project-status)
-- [License](#license)
+ollama pull llama3.2
+Run the model:
 
----
+ollama run llama3.2
+Ollama should be available locally at:
 
-# Project Overview
+http://localhost:11434
+Verify the local server from PowerShell:
 
-Retrieval-Augmented Generation combines two major capabilities:
+Invoke-WebRequest http://localhost:11434 -UseBasicParsing
+Add Documents
+Place documents inside:
 
-1. Information retrieval
-2. Language generation
+watch_folder/
+Current supported formats:
 
-Instead of asking a language model to answer a question only from the knowledge stored inside its parameters, a RAG system first retrieves relevant information from an external knowledge source and then provides that information to the language model as context.
+.pdf
+.txt
+.md
+Example:
 
-This project implements that process locally.
+watch_folder/
+├── document1.pdf
+├── document2.pdf
+├── notes.txt
+└── research.md
+Documents inside watch_folder/ are processed locally and are not uploaded to GitHub.
 
-The system takes documents from a local folder, processes them into chunks, generates embeddings for those chunks, stores the embeddings in ChromaDB, retrieves relevant chunks for a user's question, and sends the retrieved context to a local Ollama model.
+Index Documents
+From the project root, run:
 
-The basic concept is:
+python -m tests.test_indexing
+The indexing pipeline performs:
 
-```text
 Documents
     ↓
-Ingestion
+Document Loading
     ↓
 Chunking
     ↓
-Embeddings
+Embedding Generation
     ↓
-Vector Database
-    ↓
-User Question
+ChromaDB Storage
+Example output:
+
+Loading documents...
+Documents loaded: 166
+Splitting documents...
+Chunks created: 533
+Creating embeddings...
+Embeddings created: 533
+Storing vectors...
+Vectors stored: 533
+
+==================================================
+INDEXING COMPLETE
+==================================================
+Documents: 166
+Chunks:    533
+Vectors:   533
+Run Retrieval Test
+python -m tests.test_retrieval
+This tests semantic similarity retrieval from ChromaDB and displays the retrieved chunk, source, chunk ID, and distance.
+
+Run Prompt Test
+python -m tests.test_prompt
+This verifies that retrieved context and the user's question are correctly combined into the RAG prompt.
+
+Run Generation Test
+python -m tests.test_generation
+This tests communication with the local Ollama llama3.2 model.
+
+Run End-to-End RAG Test
+python -m tests.test_rag
+The complete pipeline is:
+
+Question
     ↓
 Query Embedding
     ↓
@@ -88,179 +159,241 @@ Context
     ↓
 Prompt
     ↓
-Local LLM
+Ollama
     ↓
 Answer
+Run Streamlit Application
+python -m streamlit run app/streamlit_app.py
+Open the local application:
 
-```
+http://localhost:8501
+The interface provides:
 
-Project Goals
-
-The first goal of this project is to create a working RAG system without depending on paid cloud APIs.
-
-The second goal is to keep the architecture understandable.
-
-The project therefore avoids hiding the complete RAG process behind a single high-level framework call.
-
-Instead, each major operation has its own module.
-
-For example:
-
-load_documents()
-↓
-split_documents()
-↓
-create_embeddings()
-↓
-store_vectors()
-↓
-retrieve_documents()
-↓
-build_prompt()
-↓
-generate_answer()
-
-This makes it possible to inspect and understand what happens at every stage.
-
-Core Architecture
-
-The current prototype follows this architecture:
-LOCAL RAG SYSTEM
-│
-▼
-┌────────────────────┐
-│ Document Ingestion │
-│ ingestion.py │
-└──────────┬─────────┘
-│
-▼
-┌────────────────────┐
-│ Chunking │
-│ chunking.py │
-└──────────┬─────────┘
-│
-▼
-┌────────────────────┐
-│ Embeddings │
-│ embeddings.py │
-└──────────┬─────────┘
-│
-▼
-┌────────────────────┐
-│ ChromaDB │
-│ vector_store.py │
-└──────────┬─────────┘
-│
-│
-User Question
-│
-▼
-┌────────────────────┐
-│ Retrieval │
-│ retrieval.py │
-└──────────┬─────────┘
-│
-▼
-┌────────────────────┐
-│ Retrieved Context │
-└──────────┬─────────┘
-│
-▼
-┌────────────────────┐
-│ Prompt Builder │
-│ prompt.py │
-└──────────┬─────────┘
-│
-▼
-┌────────────────────┐
-│ RAG Pipeline │
-│ rag_pipeline.py │
-└──────────┬─────────┘
-│
-▼
-┌────────────────────┐
-│ Generation │
-│ generation.py │
-└──────────┬─────────┘
-│
-▼
-┌────────────────────┐
-│ Ollama llama3.2 │
-└──────────┬─────────┘
-│
-▼
-Answer
-
-End-to-End Data Flow
-
-The complete system can be understood as two connected pipelines.
-
-Indexing Pipeline
-
-The first pipeline prepares documents for retrieval.
-
-Document
-↓
-Document Loader
-↓
-LangChain Document
-↓
-Text Chunk
-↓
-Embedding Model
-↓
-Vector
-↓
-ChromaDB
-
-This pipeline runs when documents are processed.
-
-Query Pipeline
-
-The second pipeline runs when the user asks a question.
-
-User Question
-↓
-Query Embedding
-↓
-ChromaDB Similarity Search
-↓
-Top-K Relevant Chunks
-↓
-Context Construction
-↓
-Prompt Construction
-↓
+Document processing
+Question input
+Answer generation
+Retrieved source display
+Retrieval distance information
+Typical Workflow
+1. Activate virtual environment
+        ↓
+2. Start Ollama
+        ↓
+3. Put documents in watch_folder/
+        ↓
+4. Run indexing
+        ↓
+5. Documents are loaded
+        ↓
+6. Documents are split into chunks
+        ↓
+7. Embeddings are generated
+        ↓
+8. Vectors are stored in ChromaDB
+        ↓
+9. Start Streamlit
+        ↓
+10. Ask questions
+        ↓
+11. Relevant chunks are retrieved
+        ↓
+12. Context is sent to llama3.2
+        ↓
+13. Answer is generated
+Useful Commands
+Environment
+.venv\Scripts\Activate.ps1
+python --version
+python -m pip --version
 Ollama
-↓
-Generated Answer
-↓
-Sources
+ollama --version
+ollama list
+ollama pull llama3.2
+ollama run llama3.2
+RAG Tests
+python -m tests.test_indexing
+python -m tests.test_retrieval
+python -m tests.test_prompt
+python -m tests.test_generation
+python -m tests.test_rag
+Streamlit
+python -m streamlit run app/streamlit_app.py
+GitHub Development
+Check repository status:
 
-Together:
+git status
+Stage changes:
 
-                 INDEXING
-                    │
+git add .
+Commit changes:
 
-Documents ─────────┤
-↓
+git commit -m "Update RAG prototype"
+Push changes:
+
+git push
+Important Git Rules
+The following should not be committed:
+
+.venv/
+chroma_db/
+watch_folder/*.pdf
+watch_folder/*.txt
+watch_folder/*.md
+.env
+The project's .gitignore prevents local environments, generated vector data, and personal documents from being uploaded.
+
+Current RAG Pipeline
+PDF / TXT / MD
+      ↓
+Document Loader
+      ↓
+Text Chunking
+      ↓
+FastEmbed
+BAAI/bge-small-en-v1.5
+      ↓
 ChromaDB
-│
-│
-▼
-USER QUESTION
-│
-↓
+Persistent Local Storage
+      ↓
+User Question
+      ↓
+Query Embedding
+      ↓
+Similarity Search
+      ↓
+Top-K Relevant Chunks
+      ↓
+Context Injection
+      ↓
+Ollama
+llama3.2
+      ↓
+Answer
+Current Status
+Local document ingestion
+PDF support
+TXT support
+Markdown support
+Configurable document chunking
+FastEmbed embeddings
+BAAI/bge-small-en-v1.5
+384-dimensional embeddings
+Persistent ChromaDB storage
+Semantic similarity retrieval
+Context construction
+Grounded RAG prompt
+Ollama integration
+llama3.2 generation
+End-to-end RAG pipeline
+Multi-document indexing
+Streamlit interface
+Component-level tests
+Current Limitations
+The first prototype intentionally keeps the implementation simple.
+
+Current document support is PDF, TXT, and Markdown.
+Retrieval currently uses dense vector similarity.
+No hybrid BM25 + vector search yet.
+No reranking yet.
+No advanced query transformation.
+No OCR pipeline yet.
+No multimodal document processing yet.
+No advanced citation system yet.
+No retrieval evaluation framework yet.
+No generation evaluation framework yet.
+No production-scale optimization yet.
+Future Development
+Future versions will gradually add:
+
+DOCX support
+PPT/PPTX support
+XLSX and CSV support
+HTML/web document ingestion
+OCR
+Table extraction
+Image-aware processing
+Semantic chunking
+Hybrid search
+BM25 retrieval
+Query transformation
+Reranking
+Metadata filtering
+Improved citations
+Conversational RAG
+Guardrails
+Retrieval evaluation
+Generation evaluation
+End-to-end evaluation
+Observability and tracing
+Performance analysis
+Experiment tracking
+RAG Learning Lab — Long-Term Goal
+The long-term goal is to evolve this prototype into an interactive RAG Learning Lab.
+
+Instead of hiding the RAG process behind a single chatbot interface, the future system will allow learners to inspect what actually happens at every stage.
+
+DOCUMENT
+   ↓
+PARSING
+   ↓
+CHUNKING
+   ↓
+EMBEDDINGS
+   ↓
+VECTOR DATABASE
+   ↓
 RETRIEVAL
-│
-↓
+   ↓
+RERANKING
+   ↓
 CONTEXT
-│
-↓
+   ↓
 PROMPT
-│
-↓
-LOCAL LLM
-│
-↓
+   ↓
+LLM
+   ↓
 ANSWER
+   ↓
+CITATIONS
+   ↓
+EVALUATION
+Future learning modules will include:
+
+Document parsing lessons
+Chunking experiments
+Chunk visualization
+Embedding visualization
+Vector database inspection
+Dense retrieval lessons
+Keyword retrieval
+Hybrid search
+Query transformation
+Reranking experiments
+Context management
+Prompt experiments
+Citation experiments
+Conversational RAG
+Guardrails
+Retrieval evaluation
+Generation evaluation
+End-to-end evaluation
+Observability
+Performance analysis
+Interactive knowledge checks
+Development Philosophy
+WORKING > COMPLEX
+
+UNDERSTANDABLE > CLEVER
+
+MODULAR > MONOLITHIC
+
+LOCAL > CLOUD
+The project starts with a simple working RAG implementation and will evolve incrementally. Each new capability should be added only after the underlying RAG concept is understood and tested.
+
+Privacy and Local Execution
+The core system is designed to operate entirely on the local machine. Documents are processed locally, embeddings are generated locally, ChromaDB is stored locally, and the LLM runs locally through Ollama.
+
+No OpenAI API key or paid cloud API is required for the prototype.
+
+License
+This project is intended to be open source. An appropriate open-source license can be added to the repository before distribution.
