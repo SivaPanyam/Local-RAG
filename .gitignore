@@ -1,0 +1,37 @@
+# Virtual environment
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.py[cod]
+
+# ChromaDB
+chroma_db/
+*.sqlite
+*.db
+
+# User documents
+watch_folder/*
+!watch_folder/.gitkeep
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Model files
+*.gguf
+*.bin
+*.safetensors

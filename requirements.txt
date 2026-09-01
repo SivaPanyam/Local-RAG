@@ -1,0 +1,7 @@
+langchain-community   ###Used for various utilities and tools for working with "language models"
+pypdf  ###Used for reading PDF files
+langchain-text-splitters ###Used for splitting the text into chunks
+fastembed ##Used for embedding generation
+chromadb###Vector Database 
+requests ##used for making HTTP requests
+streamlit   ###Used for building web applications(Frontend)
